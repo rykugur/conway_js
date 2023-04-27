@@ -2,6 +2,8 @@ import { useCallback, useRef, useState } from "react";
 import "./App.css";
 import useInterval from "./useInterval.js";
 
+const numRows = 20;
+const numCols = 20;
 // stretch goal: detect looping
 
 // Directions: N, S, E, W, NE, NW, SE, SW
@@ -16,7 +18,7 @@ const operations = [
   [-1, -1], // bottom left
 ];
 
-const generateRandomGrid = (numRows, numCols) => {
+const generateRandomGrid = () => {
   const rows = [];
   for (let row = 0; row < numRows; row++) {
     rows.push(Array.from(Array(numCols), () => (Math.random() > 0.7 ? 1 : 0)));
@@ -26,7 +28,7 @@ const generateRandomGrid = (numRows, numCols) => {
 
 const LoopCount = ({ count }) => <div>Loop count: {count}</div>;
 
-function App({ numRows = 10, numCols = 10, interval = 150 }) {
+function App() {
   const [loopCount, setLoopCount] = useState(0);
   const [grid, setGrid] = useState(() => {
     return generateRandomGrid(numRows, numCols);
@@ -37,57 +39,54 @@ function App({ numRows = 10, numCols = 10, interval = 150 }) {
   runningRef.current = running;
   const startedRef = useRef(false);
 
-  const runSimulation = useCallback(
-    (grid) => {
-      if (!runningRef.current) {
-        return;
-      }
+  const runSimulation = useCallback((grid) => {
+    if (!runningRef.current) {
+      return;
+    }
 
-      setEvolving(true);
+    setEvolving(true);
 
-      let gridCopy = JSON.parse(JSON.stringify(grid));
-      for (let row = 0; row < numRows; row++) {
-        for (let col = 0; col < numCols; col++) {
-          let neighbors = 0;
+    let gridCopy = JSON.parse(JSON.stringify(grid));
+    for (let row = 0; row < numRows; row++) {
+      for (let col = 0; col < numCols; col++) {
+        let neighbors = 0;
 
-          operations.forEach(([x, y]) => {
-            const newRow = row + x;
-            const newCol = col + y;
+        operations.forEach(([x, y]) => {
+          const newRow = row + x;
+          const newCol = col + y;
 
-            if (
-              newRow >= 0 &&
-              newRow < numRows &&
-              newCol >= 0 &&
-              newCol < numCols
-            ) {
-              neighbors += grid[newRow][newCol];
-            }
-          });
-
-          if (neighbors < 2 || neighbors > 3) {
-            gridCopy[row][col] = 0;
-          } else if (grid[row][col] === 0 && neighbors === 3) {
-            gridCopy[row][col] = 1;
+          if (
+            newRow >= 0 &&
+            newRow < numRows &&
+            newCol >= 0 &&
+            newCol < numCols
+          ) {
+            neighbors += grid[newRow][newCol];
           }
+        });
+
+        if (neighbors < 2 || neighbors > 3) {
+          gridCopy[row][col] = 0;
+        } else if (grid[row][col] === 0 && neighbors === 3) {
+          gridCopy[row][col] = 1;
         }
       }
+    }
 
-      // this is wildly non-performant with larger grids
-      if (JSON.stringify(grid) === JSON.stringify(gridCopy)) {
-        setEvolving(false);
-        setRunning(false);
-        return;
-      }
+    // this is wildly non-performant with larger grids
+    if (JSON.stringify(grid) === JSON.stringify(gridCopy)) {
+      setEvolving(false);
+      setRunning(false);
+      return;
+    }
 
-      setLoopCount((previous) => previous + 1);
-      setGrid(gridCopy);
-    },
-    [numCols, numRows]
-  );
+    setLoopCount((previous) => previous + 1);
+    setGrid(gridCopy);
+  }, []);
 
   useInterval(() => {
     runSimulation(grid);
-  }, interval);
+  }, 150);
 
   if (!startedRef.current) {
     setRunning(true);
