@@ -1,4 +1,5 @@
 .App {
+  background-color: #282c34;
   text-align: center;
 }
 
@@ -19,13 +20,28 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: top;
   font-size: calc(10px + 2vmin);
   color: white;
 }
 
 .App-link {
   color: #61dafb;
+}
+
+.Cell-alive {
+  display: inline-block;
+  width: 100px;
+  height: 100px;
+  background: black;
+}
+
+.Cell-dead {
+  display: inline-block;
+  width: 100px;
+  height: 100px;
+  background: white;
+
 }
 
 @keyframes App-logo-spin {
